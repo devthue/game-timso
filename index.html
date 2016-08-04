@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+	<title>Socket.IO chat</title>
+	<style>
+		#background {
+		    position: relative;
+		    margin: 0 auto;
+		    width: 500px;
+		    height: 500px;
+		}	
+		#statictis{
+			margin: 0 auto;
+			width: 500px;
+		}	
+		.item {
+		    position: relative;
+		    width: 40px;
+		    height: 40px;
+		    float: left;
+		    background: #eee;
+		    border: 5px solid #ddd;
+		    text-align: center;
+		    line-height: 40px;
+		}
+		.item-green{
+			background: green;
+			color: #fff;
+		}	
+		.item-red{
+			background: red;
+			color: #fff;
+		}			
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+</head>
+<body>
+	<div id="background">
+	</div>
+	<div id="statictis">
+		Green: <span id="green">0</span>
+		Red: <span id="green">0</span>
+	</div>	
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var object = [];
+		var number = 100;
+		for (var i = 0; i < number; i++) {
+			do{
+				var randomNum = Math.floor(Math.random() * number) + 1;	
+			}while(object.indexOf(randomNum) != -1);
+			object[i] = randomNum;
+			var item = '<span id="'+ randomNum +'" class="item" data-id="'+ randomNum +'">'+ randomNum +'</span>';
+			$('#background').append(item);
+		}
+
+		var socket = io();
+		socket.on('userId', function (data) {
+			var userId = data;
+			if(userId == 1){
+				userName = 'item-green';
+			}else{
+				userName = 'item-red';
+			}
+			$('.item').click(function(){
+				$( this ).addClass(userName);
+				var numberSelect = $(this).data('id');
+				socket.emit('send', {
+					numberSelect : numberSelect,
+					userName : userName
+				});
+			});			
+		});
+		socket.on('receive', function (data) {
+			$('#' + data.numberSelect).addClass(data.userName);
+		});
+	</script>
+</body>
+</html>
